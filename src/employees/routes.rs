@@ -1,40 +1,49 @@
-use actix_web::{delete, get, post, put, web, HttpResponse, Responder};
+use crate::employees::{Employee, Employees};
+use crate::error_handler::CustomError;
+use actix_web::{delete, get, post, put, web, HttpResponse};
 use serde_json::json;
-use crate::employees::Employee;
+
+// エンドポイントと、返す値を実装
 
 #[get("/employees")]
-async fn find_all() -> impl Responder {
-  HttpResponse::Ok().json(vec![
-    Employee {
-      id: 1,
-      first_name : "Ola".to_string(),
-      last_name: "John Ajiboye".to_string(),
-      department: "Engineering".to_string(),
-      salary: 4500,
-      age: 23
-    },
-    Employee {
-      id: 2,
-      first_name : "James".to_string(),
-      last_name: "Bond".to_string(),
-      department: "Accounting".to_string(),
-      salary: 3500,
-      age: 43
-    },
-  ])
+async fn find_all() -> Result<HttpResponse, CustomError> {
+  let employees = Employees::find_all()?;
+  Ok(HttpResponse::Ok().json(employees))
 }
+
 #[get("/employees/{id}")]
-async fn find() -> impl Responder {
-  HttpResponse::Ok().json(Employee {
-    id: 2,
-    first_name : "James".to_string(),
-    last_name: "Bond".to_string(),
-    department: "Accounting".to_string(),
-    salary: 3500,
-    age: 43
-  })
+async fn find(id: web::Path<i32>) -> Result<HttpResponse, CustomError> {
+  let employee = Employees::find(id.into_inner())?;
+  Ok(HttpResponse::Ok().json(employee))
 }
-pub fn init_routes(config: &mut web::ServiceConfig) {
-  config.service(find_all);
-  config.service(find);
+
+#[post("/employees")]
+async fn create(employee: web::Json<Employee>) -> Result<HttpResponse, CustomError> {
+  let employee = Employees::create(employee.into_inner())?;
+  Ok(HttpResponse::Ok().json(employee))
+}
+
+#[put("/employees/{id}")]
+async fn update(
+  id: web::Path<i32>,
+  employee: web::Json<Employee>,
+) -> Result<HttpResponse, CustomError> {
+  let employee = Employees::update(id.into_inner(), employee.into_inner())?;
+  Ok(HttpResponse::Ok().json(employee))
+}
+
+#[delete("/employees/{id}")]
+// web::Path: 引数の型を定義
+async fn delete(id: web::Path<i32>) -> Result<HttpResponse, CustomError> {
+  let deleted_employee = Employees::delete(id.into_inner())?;
+  Ok(HttpResponse::Ok().json(json!({ "deleted": deleted_employee })))
+}
+
+// &mutをつけるとmutable参照になり書き込みができるようになる
+pub fn init_routes(comfig: &mut web::ServiceConfig) {
+  comfig.service(find_all);
+  comfig.service(find);
+  comfig.service(create);
+  comfig.service(update);
+  comfig.service(delete);
 }
