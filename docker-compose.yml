@@ -2,10 +2,16 @@ version: "3.8"
 services:
   app:
     build: .
+    command: /bin/sh -c "cargo watch -x run"
     volumes:
       - ./:/app
-    environment:
-      - USER=nozomi
+    ports:
+      - 8000:8000
+    depends_on:
+      - db
+    env_file:
+      - .env
+    stdin_open: true
     tty: true
 
   db:
