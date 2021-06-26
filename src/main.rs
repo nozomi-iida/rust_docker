@@ -18,6 +18,7 @@ async fn main() -> std::io::Result<()> {
           .route("/{name}", web::get().to(welcome))
           .configure(employees::init_routes)
     })
+      // 0.0.0.0は全てのIPアドレスがアクセル可能？
       .bind("0.0.0.0:8000")?
       .run()
       .await

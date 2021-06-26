@@ -3,6 +3,7 @@ services:
   app:
     build: .
     command: /bin/sh -c "cargo watch -x run"
+    # データの永続化、変更をリアルタイムで反映させる
     volumes:
       - ./:/app
     ports:

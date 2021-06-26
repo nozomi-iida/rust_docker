@@ -1,5 +1,6 @@
 FROM rust:1.53.0
 
+# デフォルトのディクトリを指定
 WORKDIR /app
 
 RUN apt-get update -qq && \
@@ -7,4 +8,5 @@ RUN apt-get update -qq && \
     cargo install cargo-watch && \
     cargo install diesel_cli --no-default-features --features postgres
 
+# ローカルのファイルの全てをコンテナのappディレクトリの中にコピーする
 COPY . .
